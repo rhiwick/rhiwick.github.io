@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Inglés">
+<meta name="theme-color" content="#EDE6D6">
+<title>Cuaderno de inglés</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;1,500&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap');
+
+  :root{
+    --paper: #EDE6D6;
+    --paper-2: #E4DBC6;
+    --ink: #24211C;
+    --ink-soft: #5B564A;
+    --rule: #C9BFA6;
+    --teal: #2F6F6E;
+    --teal-deep: #1E4F4E;
+    --amber: #C97A2B;
+    --brick: #B0392F;
+    --card-bg: #F6F1E6;
+  }
+
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+
+  body{
+    background: var(--paper);
+    background-image:
+      repeating-linear-gradient(180deg, rgba(0,0,0,0.015) 0px, rgba(0,0,0,0.015) 1px, transparent 1px, transparent 32px);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 28px 16px 60px;
+  }
+
+  .wrap{ max-width: 760px; margin: 0 auto; }
+
+  header.top{
+    display:flex;
+    align-items: baseline;
+    justify-content: space-between;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 14px;
+    margin-bottom: 22px;
+  }
+  header.top h1{
+    font-family: 'Lora', serif;
+    font-weight: 600;
+    font-size: 26px;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  header.top .today-label{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--ink-soft);
+    text-transform: capitalize;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  @media (max-width: 560px){ .grid{ grid-template-columns: 1fr; } }
+
+  .card{
+    background: var(--card-bg);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 18px;
+  }
+
+  .card h2{
+    font-family: 'Lora', serif;
+    font-weight: 600;
+    font-size: 15px;
+    margin: 0 0 12px;
+    color: var(--ink);
+  }
+
+  /* --- Today card --- */
+  .today-card{ grid-column: 1 / -1; }
+  .today-actions{ display:flex; gap: 10px; flex-wrap: wrap; align-items:center; }
+  input[type=time]{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 15px;
+    padding: 8px 10px;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+    border-radius: 3px;
+    color: var(--ink);
+  }
+  button{
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    border: none;
+    border-radius: 3px;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: opacity .15s ease;
+  }
+  button:hover{ opacity: 0.85; }
+  button:active{ transform: translateY(1px); }
+  .btn-teal{ background: var(--teal); color: #F6F1E6; }
+  .btn-ghost{ background: transparent; color: var(--ink); border: 1px solid var(--ink); }
+  .btn-brick{ background: var(--brick); color: #F6F1E6; }
+  .btn-small{ padding: 6px 10px; font-size: 12px; }
+
+  .today-status{
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .today-status.has-class{ color: var(--teal-deep); }
+
+  /* --- Credit ledger card --- */
+  .balance-num{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 40px;
+    font-weight: 600;
+    line-height: 1;
+    margin-bottom: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+  .balance-num.ok{ color: var(--teal-deep); }
+  .balance-num.low{ color: var(--amber); }
+  .balance-num.over{ color: var(--brick); }
+  .balance-sub{ font-size: 12px; color: var(--ink-soft); margin-bottom: 14px; }
+
+  .load-row{ display:flex; gap: 8px; margin-top: 10px; }
+  .load-row input[type=number]{
+    flex: 1;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    padding: 8px 10px;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+    border-radius: 3px;
+    color: var(--ink);
+    min-width: 0;
+  }
+  .quick-amounts{ display:flex; gap:6px; margin-top:8px; }
+  .quick-amounts button{ flex:1; background: var(--paper-2); color: var(--ink); font-size:12px; padding: 6px; }
+
+  /* --- Totals card --- */
+  .totals-row{ display:flex; justify-content: space-between; align-items:baseline; padding: 6px 0; border-bottom: 1px dotted var(--rule); }
+  .totals-row:last-child{ border-bottom: none; }
+  .totals-row .label{ font-size: 13px; color: var(--ink-soft); }
+  .totals-row .value{ font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 15px; }
+
+  /* --- Calendar --- */
+  .cal-header{ display:flex; align-items:center; justify-content: space-between; margin-bottom: 12px; }
+  .cal-header .month-label{ font-family:'Lora', serif; font-weight:600; font-size:16px; text-transform: capitalize; }
+  .cal-nav{ display:flex; gap:6px; }
+  .cal-nav button{ background: var(--paper-2); color: var(--ink); padding: 4px 10px; font-size: 13px; }
+
+  .cal-grid{ display:grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal-dow{ text-align:center; font-size: 10px; color: var(--ink-soft); font-family:'IBM Plex Mono',monospace; padding-bottom: 4px; }
+  .cal-day{
+    aspect-ratio: 1;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    background: var(--paper);
+    display:flex;
+    flex-direction: column;
+    align-items:center;
+    justify-content:center;
+    font-family:'IBM Plex Mono',monospace;
+    font-size: 12px;
+    cursor: pointer;
+    position: relative;
+    color: var(--ink-soft);
+  }
+  .cal-day.empty{ visibility:hidden; cursor:default; }
+  .cal-day.future{ opacity: 0.35; cursor:default; }
+  .cal-day.has-class{ background: var(--teal); color: #F6F1E6; border-color: var(--teal-deep); font-weight:600; }
+  .cal-day.has-payment::after{
+    content:''; position:absolute; top:3px; right:3px;
+    width: 5px; height:5px; border-radius: 50%; background: var(--amber);
+  }
+  .cal-day.today{ box-shadow: inset 0 0 0 2px var(--ink); }
+
+  .legend{ display:flex; gap: 16px; margin-top: 10px; font-size: 11px; color: var(--ink-soft); }
+  .legend span{ display:flex; align-items:center; gap:5px; }
+  .dot{ width:9px; height:9px; border-radius:50%; display:inline-block; }
+  .dot.teal{ background: var(--teal); }
+  .dot.amber{ background: var(--amber); }
+
+  /* --- Modal --- */
+  .overlay{
+    position: fixed; inset:0; background: rgba(36,33,28,0.45);
+    display:none; align-items:center; justify-content:center; padding: 20px; z-index: 10;
+  }
+  .overlay.open{ display:flex; }
+  .modal{
+    background: var(--card-bg); border: 1px solid var(--ink); border-radius: 4px;
+    padding: 20px; width: 100%; max-width: 340px;
+  }
+  .modal h3{ font-family:'Lora',serif; font-size:16px; margin:0 0 4px; text-transform: capitalize; }
+  .modal .modal-date{ font-family:'IBM Plex Mono',monospace; font-size: 12px; color: var(--ink-soft); margin-bottom:14px; }
+  .modal label{ display:block; font-size:12px; color: var(--ink-soft); margin: 12px 0 4px; }
+  .modal input{ width:100%; font-family:'IBM Plex Mono',monospace; font-size:14px; padding:8px; border:1px solid var(--rule); background: var(--paper); border-radius:3px; color: var(--ink); }
+  .modal-actions{ display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
+  .modal-actions button{ flex: 1; min-width: 100px; }
+  .modal-close{ background:none; border:none; color: var(--ink-soft); font-size:12px; text-decoration:underline; padding:0; margin-top:14px; cursor:pointer; }
+
+  .backup-bar{
+    display:flex; align-items:center; justify-content: space-between; gap: 10px;
+    font-family:'IBM Plex Mono',monospace; font-size: 12px; color: var(--ink-soft);
+    background: var(--paper-2); border: 1px solid var(--rule); border-radius: 3px;
+    padding: 10px 12px; margin-bottom: 18px; flex-wrap: wrap;
+  }
+  .backup-bar .backup-status.stale{ color: var(--amber); font-weight:600; }
+  .backup-bar .backup-status.never{ color: var(--brick); font-weight:600; }
+  .backup-actions{ display:flex; gap:8px; }
+  .backup-actions button{ font-size: 12px; padding: 7px 12px; }
+  #importFile{ display:none; }
+
+  .loading, .error-msg{ font-family:'IBM Plex Mono',monospace; font-size:13px; color: var(--ink-soft); text-align:center; padding: 30px 0; }
+  .error-msg{ color: var(--brick); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <h1>Cuaderno de inglés</h1>
+    <div class="today-label" id="todayLabel"></div>
+  </header>
+
+  <div class="backup-bar" id="backupBar">
+    <span id="backupStatus">Cargando estado del respaldo…</span>
+    <div class="backup-actions">
+      <button class="btn-ghost" id="exportBtn">Descargar respaldo</button>
+      <button class="btn-ghost" id="importBtn">Restaurar</button>
+      <input type="file" id="importFile" accept="application/json">
+    </div>
+  </div>
+
+  <div id="app">
+    <div class="loading">Abriendo el cuaderno…</div>
+  </div>
+
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h3 id="modalTitle">Editar día</h3>
+    <div class="modal-date" id="modalDate"></div>
+
+    <label for="modalTime">Hora de la clase</label>
+    <input type="time" id="modalTime" value="09:00">
+
+    <label for="modalAmount">Pago realizado ese día (ARS, opcional)</label>
+    <input type="number" id="modalAmount" placeholder="ej: 30000" min="0" step="500">
+
+    <div class="modal-actions">
+      <button class="btn-teal" id="modalSaveClass">Guardar clase</button>
+      <button class="btn-ghost" id="modalSavePaymentOnly">Solo registrar pago</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-brick btn-small" id="modalClear">Borrar registro del día</button>
+    </div>
+    <button class="modal-close" id="modalCancel">Cancelar</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  const COST_PER_CLASS = 7500; // 15000 ARS / 2 clases de 40 min
+  const CLASS_MINUTES = 40;
+  const STORAGE_KEY = 'registro-ingles-data';
+  const BACKUP_KEY = 'registro-ingles-last-backup';
+
+  const $ = (id) => document.getElementById(id);
+  const pad = (n) => String(n).padStart(2,'0');
+  const isoDate = (d) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  const money = (n) => '$' + Math.round(n).toLocaleString('es-AR');
+
+  const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const DOW = ['L','M','X','J','V','S','D'];
+
+  const today = new Date();
+  const todayISO = isoDate(today);
+  $('todayLabel').textContent = today.toLocaleDateString('es-AR', { weekday:'long', day:'numeric', month:'long' });
+
+  let data = { classes: {}, payments: {} };
+  // classes: { "2026-09-11": { time: "09:00" } }
+  // payments: { "2026-09-11": amountNumber }  -- one payment entry per day (sums if edited)
+
+  let viewYear = today.getFullYear();
+  let viewMonth = today.getMonth(); // 0-indexed
+  let modalDateISO = null;
+
+  async function load(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){
+        const parsed = JSON.parse(raw);
+        data.classes = parsed.classes || {};
+        data.payments = parsed.payments || {};
+      }
+    }catch(e){
+      console.error('No se pudo leer lo guardado', e);
+    }
+    render();
+    renderBackupBar();
+  }
+
+  async function save(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }catch(e){
+      console.error('Storage error', e);
+    }
+  }
+
+  function renderBackupBar(){
+    const el = $('backupStatus');
+    const lastRaw = localStorage.getItem(BACKUP_KEY);
+    el.className = '';
+    if(!lastRaw){
+      el.textContent = 'Todavía no hiciste ningún respaldo';
+      el.classList.add('backup-status','never');
+      return;
+    }
+    const last = new Date(lastRaw);
+    const days = Math.floor((Date.now() - last.getTime()) / 86400000);
+    el.classList.add('backup-status');
+    if(days <= 0){
+      el.textContent = 'Último respaldo: hoy';
+    } else if(days === 1){
+      el.textContent = 'Último respaldo: ayer';
+      el.classList.add('stale');
+    } else {
+      el.textContent = `Último respaldo: hace ${days} días`;
+      if(days >= 7) el.classList.add('never'); // rojo
+      else if(days >= 3) el.classList.add('stale'); // naranja
+    }
+  }
+
+  function exportBackup(){
+    const payload = JSON.stringify(data, null, 2);
+    const blob = new Blob([payload], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `registro-ingles-backup-${todayISO}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    localStorage.setItem(BACKUP_KEY, new Date().toISOString());
+    renderBackupBar();
+  }
+
+  function importBackup(file){
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try{
+        const parsed = JSON.parse(e.target.result);
+        if(!parsed || typeof parsed !== 'object') throw new Error('Formato inválido');
+        const ok = confirm('Esto va a reemplazar los datos actuales por los del archivo. ¿Continuar?');
+        if(!ok) return;
+        data.classes = parsed.classes || {};
+        data.payments = parsed.payments || {};
+        await save();
+        render();
+      }catch(err){
+        alert('No se pudo leer el archivo. Verificá que sea un respaldo válido de este cuaderno.');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  $('exportBtn').addEventListener('click', exportBackup);
+  $('importBtn').addEventListener('click', () => $('importFile').click());
+  $('importFile').addEventListener('change', (e) => {
+    if(e.target.files && e.target.files[0]) importBackup(e.target.files[0]);
+    e.target.value = '';
+  });
+
+  function totals(){
+    const totalPaid = Object.values(data.payments).reduce((a,b)=>a+b, 0);
+    const creditsPurchased = totalPaid / COST_PER_CLASS;
+    const classDates = Object.keys(data.classes);
+    const classesTaken = classDates.length;
+    const balance = creditsPurchased - classesTaken;
+    const totalMinutes = classesTaken * CLASS_MINUTES;
+    return { totalPaid, creditsPurchased, classesTaken, balance, totalMinutes };
+  }
+
+  function render(){
+    const t = totals();
+    const app = $('app');
+
+    let balanceClass = 'ok';
+    let balanceText = '';
+    if(t.balance < 0){
+      balanceClass = 'over';
+      balanceText = `Debés ${Math.abs(t.balance).toFixed(1)} clase(s) — hay que recargar`;
+    } else if(t.balance < 1){
+      balanceClass = 'low';
+      balanceText = `Casi sin crédito — quedan ${t.balance.toFixed(1)} clase(s)`;
+    } else {
+      balanceClass = 'ok';
+      balanceText = `Te quedan ${t.balance.toFixed(1)} clase(s) antes de recargar`;
+    }
+
+    const hasClassToday = !!data.classes[todayISO];
+
+    app.innerHTML = `
+      <div class="card today-card">
+        <h2>Hoy</h2>
+        <div class="today-actions">
+          <input type="time" id="todayTime" value="${hasClassToday ? data.classes[todayISO].time : '09:00'}">
+          <button class="btn-teal" id="todayYes">${hasClassToday ? 'Actualizar hora' : 'Tuve clase hoy'}</button>
+          ${hasClassToday ? '<button class="btn-ghost" id="todayUndo">Deshacer</button>' : '<button class="btn-ghost" id="todayNo">No tuve clase</button>'}
+        </div>
+        <div class="today-status ${hasClassToday ? 'has-class' : ''}">
+          ${hasClassToday ? `Registrada a las ${data.classes[todayISO].time} · 40 min` : 'Todavía no registraste el día de hoy.'}
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h2>Crédito de clases</h2>
+          <div class="balance-num ${balanceClass}">${t.balance.toFixed(1)}</div>
+          <div class="balance-sub">${balanceText}</div>
+          <div class="load-row">
+            <input type="number" id="loadAmount" placeholder="Monto cargado (ARS)" min="0" step="500">
+            <button class="btn-teal" id="loadBtn">Cargar</button>
+          </div>
+          <div class="quick-amounts">
+            <button data-amt="15000">$15.000</button>
+            <button data-amt="30000">$30.000</button>
+            <button data-amt="60000">$60.000</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Resumen general</h2>
+          <div class="totals-row"><span class="label">Clases tomadas</span><span class="value">${t.classesTaken}</span></div>
+          <div class="totals-row"><span class="label">Tiempo total</span><span class="value">${(t.totalMinutes/60).toFixed(1)} h</span></div>
+          <div class="totals-row"><span class="label">Total pagado</span><span class="value">${money(t.totalPaid)}</span></div>
+          <div class="totals-row"><span class="label">Costo por clase</span><span class="value">${money(COST_PER_CLASS)}</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="cal-header">
+          <div class="cal-nav"><button id="prevMonth">‹</button></div>
+          <div class="month-label">${MESES[viewMonth]} ${viewYear}</div>
+          <div class="cal-nav"><button id="nextMonth">›</button></div>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+        <div class="legend">
+          <span><span class="dot teal"></span> día con clase</span>
+          <span><span class="dot amber"></span> día con pago registrado</span>
+        </div>
+      </div>
+    `;
+
+    renderCalendar();
+    bindEvents();
+  }
+
+  function renderCalendar(){
+    const grid = $('calGrid');
+    grid.innerHTML = DOW.map(d => `<div class="cal-dow">${d}</div>`).join('');
+
+    const firstOfMonth = new Date(viewYear, viewMonth, 1);
+    let startOffset = firstOfMonth.getDay() - 1; // Monday-first
+    if(startOffset < 0) startOffset = 6;
+
+    for(let i=0;i<startOffset;i++){
+      grid.innerHTML += `<div class="cal-day empty"></div>`;
+    }
+
+    const daysInMonth = new Date(viewYear, viewMonth+1, 0).getDate();
+    for(let day=1; day<=daysInMonth; day++){
+      const d = new Date(viewYear, viewMonth, day);
+      const iso = isoDate(d);
+      const isFuture = d > today && iso !== todayISO;
+      const hasClass = !!data.classes[iso];
+      const hasPayment = !!data.payments[iso];
+      const isToday = iso === todayISO;
+
+      const classes = ['cal-day'];
+      if(isFuture) classes.push('future');
+      if(hasClass) classes.push('has-class');
+      if(hasPayment) classes.push('has-payment');
+      if(isToday) classes.push('today');
+
+      grid.innerHTML += `<div class="${classes.join(' ')}" data-iso="${iso}" data-future="${isFuture}">${day}</div>`;
+    }
+
+    grid.querySelectorAll('.cal-day:not(.empty):not(.future)').forEach(el=>{
+      el.addEventListener('click', () => openModal(el.dataset.iso));
+    });
+  }
+
+  function bindEvents(){
+    $('todayYes').addEventListener('click', async () => {
+      const time = $('todayTime').value || '09:00';
+      data.classes[todayISO] = { time };
+      await save();
+      render();
+    });
+    const undoBtn = $('todayUndo');
+    if(undoBtn){
+      undoBtn.addEventListener('click', async () => {
+        delete data.classes[todayISO];
+        await save();
+        render();
+      });
+    }
+    const noBtn = $('todayNo');
+    if(noBtn){
+      noBtn.addEventListener('click', () => { /* nothing to store for "no class" */ });
+    }
+
+    $('loadBtn').addEventListener('click', async () => {
+      const val = parseFloat($('loadAmount').value);
+      if(!val || val <= 0) return;
+      data.payments[todayISO] = (data.payments[todayISO] || 0) + val;
+      await save();
+      render();
+    });
+
+    document.querySelectorAll('.quick-amounts button').forEach(btn=>{
+      btn.addEventListener('click', async () => {
+        const amt = parseFloat(btn.dataset.amt);
+        data.payments[todayISO] = (data.payments[todayISO] || 0) + amt;
+        await save();
+        render();
+      });
+    });
+
+    $('prevMonth').addEventListener('click', () => {
+      viewMonth--; if(viewMonth<0){ viewMonth=11; viewYear--; }
+      renderCalendar();
+    });
+    $('nextMonth').addEventListener('click', () => {
+      viewMonth++; if(viewMonth>11){ viewMonth=0; viewYear++; }
+      renderCalendar();
+    });
+  }
+
+  function openModal(iso){
+    modalDateISO = iso;
+    const d = new Date(iso + 'T00:00:00');
+    $('modalDate').textContent = d.toLocaleDateString('es-AR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+    $('modalTime').value = data.classes[iso] ? data.classes[iso].time : '09:00';
+    $('modalAmount').value = data.payments[iso] || '';
+    $('overlay').classList.add('open');
+  }
+  function closeModal(){ $('overlay').classList.remove('open'); modalDateISO = null; }
+
+  $('modalCancel').addEventListener('click', closeModal);
+  $('overlay').addEventListener('click', (e) => { if(e.target.id === 'overlay') closeModal(); });
+
+  $('modalSaveClass').addEventListener('click', async () => {
+    if(!modalDateISO) return;
+    data.classes[modalDateISO] = { time: $('modalTime').value || '09:00' };
+    const amt = parseFloat($('modalAmount').value);
+    if(amt > 0) data.payments[modalDateISO] = amt;
+    await save();
+    closeModal();
+    render();
+  });
+
+  $('modalSavePaymentOnly').addEventListener('click', async () => {
+    if(!modalDateISO) return;
+    const amt = parseFloat($('modalAmount').value);
+    if(amt > 0){
+      data.payments[modalDateISO] = amt;
+      await save();
+    }
+    closeModal();
+    render();
+  });
+
+  $('modalClear').addEventListener('click', async () => {
+    if(!modalDateISO) return;
+    delete data.classes[modalDateISO];
+    delete data.payments[modalDateISO];
+    await save();
+    closeModal();
+    render();
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>
